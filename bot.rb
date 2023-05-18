@@ -65,7 +65,13 @@ def queue_command(data = {})
   @queue_loop = true
   Thread.new do
     while @queue.any?
-      process_command(@queue.delete_at(0))
+      command = @queue.delete_at(0)
+      begin
+        process_command(command)
+      rescue => e
+        @queue.append(command)
+        puts "Error found, retrying... #{e.message}"
+      end
     end
     @queue_loop = false
   end
@@ -87,6 +93,10 @@ end
 
 bot.command :bmox_queue do |_event, *args|
   "**META:** There are #{@queue.size + (@queue_loop ? 1 : 0)} prompts being processed currently."
+end
+
+bot.command :bmox_help do |_event, *args|
+  "**META:** BMOx, by Moxvallix\nRun `/bmox_list` to see character commands!\nRun `/bmox_queue` to see the queue size."
 end
 
 bot.run
