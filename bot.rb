@@ -31,7 +31,11 @@ end
 
 
 def process_response(event, args, output, char_name)
+  if ENV["HIDE_NAMES"]
+    event.channel.send_message output.match(/(?<=### Assistant:)[\s\S]+/).to_s.strip
+  else
     event.channel.send_message "**#{char_name}:** " + output.match(/(?<=### Assistant:)[\s\S]+/).to_s.strip
+  end
   # lookup = output.match(/(?<=\[:)[\s\S]+(?=:\])/)
   # if lookup.is_a? MatchData
   #   perform_lookup(event, args, lookup)
