@@ -48,7 +48,7 @@ def respond_as_character(file, event, args)
   start_typing(event.channel)
   user_prompt = args.join(" ")
   prompt = file.read.gsub("<prompt>", user_prompt).gsub("<username>", event.author.display_name)
-  output, status = Open3.capture2(LLAMA_DIR.join("main").to_s, "-ngl", "24", "-m", LLAMA_DIR.join("models/#{ENV['MODEL']}").to_s, "-p", prompt, "-n", "768")
+  output, status = Open3.capture2(LLAMA_DIR.join("main").to_s, "-ngl", ENV.fetch("NGL", "24"), "-m", LLAMA_DIR.join("models/#{ENV['MODEL']}").to_s, "-p", prompt, "-n", ENV.fetch("N", "768"))
   stop_typing(event.channel)
   char_name = file.basename.to_s.delete_suffix(".template").capitalize
   process_response(event, args, output, char_name)
