@@ -1,10 +1,3 @@
-GIT
-  remote: https://github.com/yoshoku/llama_cpp.rb.git
-  revision: db8b41c2a466d01de07ec33322263975a8d27448
-  branch: main
-  specs:
-    llama_cpp (0.0.7)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -30,6 +23,7 @@ GEM
     netrc (0.11.0)
     opus-ruby (1.0.1)
       ffi
+    require_all (3.0.0)
     rest-client (2.1.0)
       http-accept (>= 1.7.0, < 2.0)
       http-cookie (>= 1.0.2, < 2.0)
@@ -49,7 +43,7 @@ PLATFORMS
 DEPENDENCIES
   discordrb
   dotenv
-  llama_cpp!
+  require_all
 
 RUBY VERSION
    ruby 3.1.0p0
