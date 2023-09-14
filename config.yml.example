@@ -13,3 +13,6 @@ paths:
 params:
   ngl: 20
   n: 768
+
+constants:
+  owner: Moxvallix

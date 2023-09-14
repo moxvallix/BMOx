@@ -26,7 +26,12 @@ class BMOx::Bot
   def respond_as_character(character, event, args)
     event.channel.typing = true
     user_prompt = args.join(" ")
-    output = character.reply_to(user_prompt)
+    substitutes = {
+      username: event.author.display_name,
+      time: Time.now.strftime("%A %d %B, %Y at %H:%M"),
+      server: event.server.name
+    }
+    output = character.reply_to(user_prompt, substitutes, BMOx::CONFIG.fetch(:params, {}))
     event.channel.typing = false
     process_response(event, args, output, character)
   end
@@ -96,7 +101,7 @@ class BMOx::Bot
   def register_character_commands
     BMOx::PROMPT_DIR.glob("*.character").each do |template|
       puts "Registering: #{template.basename}"
-      character = BMOx::Character.new(template.read)
+      character = BMOx::Character.new(template.read, BMOx::CONFIG.fetch(:constants, {}))
       unless character.prompt_id
         puts "Character is missing a prompt id!"
         next
