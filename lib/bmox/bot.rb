@@ -17,7 +17,11 @@ class BMOx::Bot
     @queue_loop = false
     
     @bot.command :bmox_list do |_event, *args|
-      "**META:** Available Characters\n" + @characters.join("\n")
+      str = "**META:** Available Characters\n"
+      @characters.each do |id, character|
+        str << "/#{id} - Talk to #{character.name}\n"
+      end
+      str
     end
 
     @bot.command :bmox_queue do |_event, *args|
