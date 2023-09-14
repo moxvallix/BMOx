@@ -6,7 +6,11 @@ class BMOx::Bot
   end
 
   def initialize
-    @bot = Discordrb::Commands::CommandBot.new token: ENV["TOKEN"], client_id: ENV["CLIENT_ID"], prefix: ENV.fetch("PREFIX", "/")
+    @bot = Discordrb::Commands::CommandBot.new(
+      token: BMOx::CONFIG.dig(:bot, :token),
+      client_id: BMOx::CONFIG.dig(:bot, :client_id),
+      prefix: BMOx::CONFIG.dig(:bot, :prefix) || "/"
+    )
     @typing = {}
     @characters = {}
     @queue = []
