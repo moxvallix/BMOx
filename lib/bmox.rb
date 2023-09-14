@@ -3,16 +3,19 @@ require 'bundler/setup'
 require 'require_all'
 require 'dotenv/load'
 require 'pathname'
+require 'yaml'
 
 module BMOx
   require_rel 'bmox'
-  
-  LLAMA_CPP = Pathname(ENV["EXECUTABLE"])
-  MODEL = Pathname(ENV["MODEL"])
-  PROMPT_DIR = Pathname(ENV["PROMPT_DIR"])
-  MEMORY_DIR = Pathname(ENV["MEMORY_DIR"])
 
-  if ENV["MEMORY_DIR"] && !MEMORY_DIR.exist?
+  CONFIG = YAML.parse_file(ENV.fetch("CONFIG_FILE", "config.yml")).to_ruby(symbolize_names: true)
+  
+  LLAMA_CPP = Pathname(CONFIG.dig(:paths, :executable).to_s)
+  MODEL = Pathname(CONFIG.dig(:paths, :model).to_s)
+  PROMPT_DIR = Pathname(CONFIG.dig(:paths, :prompt).to_s)
+  MEMORY_DIR = Pathname(CONFIG.dig(:paths, :memory).to_s)
+
+  if MEMORY_DIR && !MEMORY_DIR.exist?
     MEMORY_DIR.mkpath
   end
 end

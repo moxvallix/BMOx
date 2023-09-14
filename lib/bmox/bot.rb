@@ -8,7 +8,7 @@ class BMOx::Bot
   def initialize
     @bot = Discordrb::Commands::CommandBot.new token: ENV["TOKEN"], client_id: ENV["CLIENT_ID"], prefix: ENV.fetch("PREFIX", "/")
     @typing = {}
-    @characters = []
+    @characters = {}
     @queue = []
     @queue_loop = false
     
@@ -32,56 +32,39 @@ class BMOx::Bot
       end
     end
     
-    BMOx::PROMPT_DIR.glob("*.template").each do |template|
+    BMOx::PROMPT_DIR.glob("*.character").each do |template|
       puts "Registering: #{template.basename}"
-      command_name = template.basename.to_s.delete_suffix(".template").to_sym
-      @characters << command_name.to_s
-      @bot.command command_name do |event, *args|
-        queue_command(template: template, event: event, args: args)
+      character = BMOx::Character.new(template.read)
+      unless character.prompt_id
+        puts "Character is missing a prompt id!"
+        next
+      end
+      @characters[character.prompt_id] = character
+      @bot.command character.prompt_id.to_s.to_sym do |event, *args|
+        queue_command(character: character, event: event, args: args)
         nil
       end
     end
   end
-  
-  
-  def start_typing(channel)
-    @typing[channel.id] = true
-    Thread.new do
-      while @typing[channel.id] do
-        channel.start_typing
-        sleep 5
-      end
-    end
+
+  def process_response(event, args, output, character)
+    embed = Discordrb::Webhooks::Embed.new(author: character.discord_author, description: output.to_s.strip)
+    event.channel.send_message("", false, embed)
   end
 
-  def stop_typing(channel)
-    @typing[channel.id] = false
-  end
-
-  def process_response(event, args, output, char_name)
-    if ENV["HIDE_NAMES"]
-      event.channel.send_message output.match(/(?<=### Assistant:)[\s\S]+/).to_s.strip
-    else
-      event.channel.send_message "**#{char_name}:** " + output.match(/(?<=### Assistant:)[\s\S]+/).to_s.strip
-    end
-  end
-
-  def respond_as_character(file, event, args)
-    start_typing(event.channel)
+  def respond_as_character(character, event, args)
+    event.channel.typing = true
     user_prompt = args.join(" ")
-    llama = BMOx::Llama.new(file, username: event.author.display_name, prompt: user_prompt)
-    output, status = llama.generate
-    puts output
-    stop_typing(event.channel)
-    char_name = file.basename.to_s.delete_suffix(".template").capitalize
-    process_response(event, args, output, char_name)
+    output = character.reply_to(user_prompt)
+    event.channel.typing = false
+    process_response(event, args, output, character)
   end
 
   def process_command(data)
-    respond_as_character(data[:template], data[:event], data[:args])
+    respond_as_character(data[:character], data[:event], data[:args])
   end
 
-  def queue_command(data = {})
+  def queue_command(**data)
     @queue << data
     return if @queue_loop
     @queue_loop = true

@@ -1,24 +1,15 @@
 require 'open3'
 
 class BMOx::Llama
-  def initialize(template, params = {})
-    @prompt = template.read
-    params.each do |key, value|
-      @prompt.gsub! "<#{key}>", value.to_s
-    end
-  end
-
-  def generate
-    puts @prompt
+  def self.generate(params = {})
     raise "Missing llama executable" unless BMOx::LLAMA_CPP.exist?
+    params.merge! BMOx::CONFIG.fetch(:params, {})
+    params = params.transform_keys { |key| "-#{key}" }.flatten(-1).compact
     output, status = Open3.capture2(
       BMOx::LLAMA_CPP.to_s,
-      "-ngl", ENV.fetch("NGL", "24"),
       "-m", BMOx::MODEL.to_s,
-      "-p", @prompt,
-      "-n", ENV.fetch("N", "768")
+      *params.map { |value| value.to_s }
     )
-    puts status
     output
   end
 end

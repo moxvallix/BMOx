@@ -1,0 +1,14 @@
+bot:
+  prefix: "/"
+  token:
+  client_id:
+
+paths:
+  executable:
+  model:
+  prompt:
+  memory: memories
+
+params:
+  ngl: 20
+  n: 768
