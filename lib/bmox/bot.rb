@@ -26,12 +26,8 @@ class BMOx::Bot
   def respond_as_character(character, event, args)
     event.channel.typing = true
     user_prompt = args.join(" ")
-    substitutes = {
-      username: event.author.display_name,
-      time: Time.now.strftime("%A %d %B, %Y at %H:%M"),
-      server: event.server.name
-    }
-    output = character.reply_to(user_prompt, substitutes, BMOx::CONFIG.fetch(:params, {}))
+    bindings = {event: event, message: user_prompt}
+    output = character.reply_to(user_prompt, {}, BMOx::CONFIG.fetch(:params, {}), bindings)
     event.channel.typing = false
     process_response(event, args, output, character)
   end
@@ -51,7 +47,7 @@ class BMOx::Bot
           process_command(command)
         rescue => e
           @queue.append(command)
-          puts "Error found, retrying... #{e.message}"
+          BMOx::LOGGER.add(Logger::Error, "Error found, retrying... #{e.message}")
         end
       end
       @queue_loop = false
@@ -100,10 +96,10 @@ class BMOx::Bot
 
   def register_character_commands
     BMOx::PROMPT_DIR.glob("*.character").each do |template|
-      puts "Registering: #{template.basename}"
+      BMOx::LOGGER.add(Logger::INFO, "Registering: #{template.basename}")
       character = BMOx::Character.new(template.read, BMOx::CONFIG.fetch(:constants, {}))
       unless character.prompt_id
-        puts "Character is missing a prompt id!"
+        BMOx::LOGGER.add(Logger::WARN, "Character is missing a prompt id!")
         next
       end
       @characters[character.prompt_id] = character

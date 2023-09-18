@@ -16,3 +16,13 @@ params:
 
 constants:
   owner: Moxvallix
+
+# Warning: variables are run using eval!
+# Do not write code in here unless you know what it does!
+# - event: the CommandEvent triggered by Discord
+# - message: the string the player sent to the bot
+
+variables:
+  time: Time.now.strftime("%A %d %B, %Y at %H:%M")
+  server: event.server.name
+  username: event.author.display_name

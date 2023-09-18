@@ -10,6 +10,7 @@ class BMOx::Llama
       "-m", BMOx::MODEL.to_s,
       *params.map { |value| value.to_s }
     )
+    BMOx::PROMPT_LOGGER.add(Logger::INFO, "\n" + output.to_s.strip)
     output
   end
 end

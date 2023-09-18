@@ -2,3 +2,4 @@
 .env
 .directory
 /config.yml
+*.log

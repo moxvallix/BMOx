@@ -32,7 +32,8 @@ class BMOx::Character
     prompt
   end
 
-  def reply_to(message, substitutes = {}, params = {})
+  def reply_to(message, substitutes = {}, params = {}, bindings = {})
+    substitutes.merge!(evaluate_variables(bindings))
     prompt = formatted_prompt(substitutes.merge({prompt: message}))
     params.merge!({"p": prompt})
     # params.merge!({"-prompt-cache": prompt_cache_file, "-prompt-cache-all": nil, "-file": prompt_history_file})
@@ -41,6 +42,25 @@ class BMOx::Character
   end
 
   private
+
+  def variables_bind(bindings = {})
+    OpenStruct.new({config: @config}.merge(bindings))
+  end
+
+  def evaluate_variables(bindings = {})
+    bind = variables_bind(bindings)
+    output = {}
+    BMOx::CONFIG.fetch(:variables, {}).each do |variable, code|
+      begin
+        evaluated = bind.instance_eval(code)
+      rescue => e
+        evaluated = ""
+        BMOx::LOGGER.error(Logger::ERROR, "Failed to evaluate variable... #{e.message}")
+      end
+      output[variable] = evaluated
+    end
+    output
+  end
 
   def check_prompt_id
     raise "Character missing a prompt id" unless prompt_id.is_a? String
