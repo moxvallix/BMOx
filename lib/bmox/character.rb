@@ -52,7 +52,7 @@ class BMOx::Character
     output = {}
     BMOx::CONFIG.fetch(:variables, {}).each do |variable, code|
       begin
-        evaluated = bind.instance_eval(code)
+        evaluated = bind.instance_eval(code).to_s
       rescue => e
         evaluated = ""
         BMOx::LOGGER.error(Logger::ERROR, "Failed to evaluate variable... #{e.message}")
