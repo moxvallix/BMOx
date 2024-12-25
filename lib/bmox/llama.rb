@@ -11,6 +11,8 @@ class BMOx::Llama
       *params.map { |value| value.to_s }
     )
     BMOx::PROMPT_LOGGER.add(Logger::INFO, "\n" + output.to_s.strip)
-    output
+
+    eot = BMOx::CONFIG.dig(:tokens, :eot) || ""
+    output.delete_suffix(eot)
   end
 end

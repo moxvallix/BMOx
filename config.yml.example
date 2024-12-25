@@ -14,6 +14,9 @@ params:
   ngl: 20
   n: 768
 
+tokens:
+  eot: "[end of text]"
+
 constants:
   owner: Moxvallix
 
