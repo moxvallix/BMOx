@@ -14,14 +14,9 @@ class BMOx::Llama
 
     eot = BMOx::CONFIG.dig(:tokens, :eot) || ""
 
-    sub_last(output, eot, "")
+
+    return output unless output.include?(eot)
+    top, _, bottom = output.rpartition(eot)
+    "#{top}#{bottom}"
   end
-
-  private
-
-  def sub_last(str, source, target)
-    return str unless str.include?(source)
-    top, middle, bottom = str.rpartition(source)
-    "#{top}#{target}#{bottom}"
-  end  
 end
