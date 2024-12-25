@@ -13,6 +13,15 @@ class BMOx::Llama
     BMOx::PROMPT_LOGGER.add(Logger::INFO, "\n" + output.to_s.strip)
 
     eot = BMOx::CONFIG.dig(:tokens, :eot) || ""
-    output.delete_suffix(eot)
+
+    sub_last(output, eot, "")
   end
+
+  private
+
+  def sub_last(str, source, target)
+    return str unless str.include?(source)
+    top, middle, bottom = str.rpartition(source)
+    "#{top}#{target}#{bottom}"
+  end  
 end
